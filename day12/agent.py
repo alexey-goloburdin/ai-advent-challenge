@@ -37,16 +37,32 @@ class AgentConfig:
     # Сколько сообщений из краткосрочной памяти включать в контекст
     context_messages_count: int = 10
 
+    # Профиль пользователя (текст из .md файла)
+    user_profile_text: Optional[str] = None
+
 
 def build_system_prompt(
     json_format: bool,
     working_memory: Dict[str, Any],
-    long_term_memory: Dict[str, Any]
+    long_term_memory: Dict[str, Any],
+    user_profile_text: Optional[str] = None
 ) -> str:
     """
     Строит системный промпт с учётом рабочей и долговременной памяти.
     """
-    base_prompt = (
+    base_prompt = ""
+
+    # Сначала добавляем профиль пользователя (стиль, формат, ограничения)
+    if user_profile_text:
+        base_prompt += (
+            "=== ПРОФИЛЬ И ПРЕДПОЧТЕНИЯ ПОЛЬЗОВАТЕЛЯ ===\n"
+            f"{user_profile_text}\n"
+            "\n"
+            "Следуй указанным предпочтениям в стиле, формате и ограничениях.\n"
+            "\n"
+        )
+
+    base_prompt += (
         "Ты — агент для получения реквизитов компании.\n"
         "Веди диалог с пользователем так, чтобы собрать реквизиты и затем вернуть их ОДНИМ финальным сообщением.\n"
         "\n"
@@ -221,7 +237,8 @@ class CompanyRequisitesAgent:
         system_prompt = build_system_prompt(
             json_format=self.config.json_format,
             working_memory=context["working"],
-            long_term_memory=context["long_term"]
+            long_term_memory=context["long_term"],
+            user_profile_text=self.config.user_profile_text
         )
 
         # 3. Готовим сообщения для LLM (системный + история из краткосрочной памяти)

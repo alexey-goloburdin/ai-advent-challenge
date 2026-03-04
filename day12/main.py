@@ -51,6 +51,10 @@ def _get_args():
     parser.add_argument("--context_messages", type=int, default=10,
                         help="Сколько сообщений включать в контекст LLM")
 
+    # Профиль пользователя
+    parser.add_argument("--profile", type=str, default=None,
+                        help="Путь к .md файлу с предпочтениями пользователя")
+
     # Пути к файлам памяти
     parser.add_argument("--short_term_path", type=str, default="memory_short_term.json",
                         help="Файл краткосрочной памяти")
@@ -171,6 +175,16 @@ def main() -> None:
     if not openai_api_key:
         raise SystemExit("Не задана переменная окружения OPENAI_API_KEY")
 
+    # Загружаем профиль пользователя из файла
+    user_profile_text = None
+    if args.profile:
+        from pathlib import Path
+        profile_path = Path(args.profile)
+        if not profile_path.exists():
+            raise SystemExit(f"Файл профиля не найден: {args.profile}")
+        user_profile_text = profile_path.read_text(encoding="utf-8")
+        print(f"Загружен профиль из {args.profile}\n")
+
     config = AgentConfig(
         model=args.model,
         extractor_model=args.extractor_model,
@@ -180,6 +194,7 @@ def main() -> None:
         working_path=args.working_path,
         long_term_path=args.long_term_path,
         context_messages_count=args.context_messages,
+        user_profile_text=user_profile_text,
     )
 
     agent = CompanyRequisitesAgent(

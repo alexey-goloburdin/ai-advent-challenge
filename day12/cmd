@@ -5,4 +5,5 @@ p main.py \
     --short_term_path memory_short_term.json \
     --working_path memory_working.json \
     --long_term_path memory_long_term.json \
-    --context_messages 10
+    --context_messages 10 \
+    --profile profile1.md
