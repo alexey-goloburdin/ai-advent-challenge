@@ -1,0 +1,8 @@
+p main.py \
+    --model o4-mini \
+    --extractor_model gpt-4o-mini \
+    --json_format \
+    --short_term_path memory_short_term.json \
+    --working_path memory_working.json \
+    --long_term_path memory_long_term.json \
+    --context_messages 10
