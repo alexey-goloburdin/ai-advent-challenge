@@ -1,0 +1,64 @@
+{
+  "project_name": "E-commerce API",
+  "description": "Инварианты для проекта интернет-магазина",
+  
+  "stack": {
+    "language": {
+      "name": "python",
+      "min_version": "3.11"
+    },
+    "framework": "fastapi",
+    "database": "postgresql",
+    "orm": "sqlalchemy",
+    "async_required": true
+  },
+  
+  "architecture": {
+    "pattern": "clean_architecture",
+    "layers": ["domain", "application", "infrastructure", "api"]
+  },
+  
+  "forbidden_technologies": [
+    "django",
+    "flask", 
+    "mongodb",
+    "raw sql",
+    "sync functions in api",
+    "jwt in cookies",
+    "pickle serialization"
+  ],
+  
+  "code_rules": [
+    {
+      "id": "async_endpoints",
+      "description": "Все эндпоинты должны быть асинхронными",
+      "check_pattern": "def\\s+\\w+\\s*\\([^)]*request",
+      "violation_pattern": "^(?!async\\s)def\\s+\\w+.*request"
+    },
+    {
+      "id": "no_raw_sql",
+      "description": "Запрещён raw SQL, только SQLAlchemy ORM",
+      "forbidden_patterns": ["execute\\s*\\(\\s*[\"']SELECT", "execute\\s*\\(\\s*[\"']INSERT", "cursor\\.execute"]
+    },
+    {
+      "id": "type_hints",
+      "description": "Все функции должны иметь type hints",
+      "required": true
+    }
+  ],
+  
+  "business_rules": [
+    {
+      "id": "price_positive",
+      "description": "Цена товара всегда > 0"
+    },
+    {
+      "id": "stock_non_negative",
+      "description": "Количество на складе >= 0"
+    },
+    {
+      "id": "order_states",
+      "description": "Заказ может быть только в состояниях: pending, confirmed, shipped, delivered, cancelled"
+    }
+  ]
+}
