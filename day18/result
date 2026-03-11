@@ -1,0 +1,101 @@
+[agent]  01:18:04 Подключаемся к MCP-серверу: reminder_server.py
+[server] 01:18:05 Reminder MCP-сервер запущен (stdio)
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/sterx/code/ai-advent-challenge/day18/reminder_server.py", line 161, in <module>
+  |     asyncio.run(main())
+  |     ~~~~~~~~~~~^^^^^^^^
+  |   File "/home/sterx/.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py", line 195, in run
+  |     return runner.run(main)
+  |            ~~~~~~~~~~^^^^^^
+  |   File "/home/sterx/.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py", line 118, in run
+  |     return self._loop.run_until_complete(task)
+  |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  |   File "/home/sterx/.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+  |     return future.result()
+  |            ~~~~~~~~~~~~~^^
+  |   File "/home/sterx/code/ai-advent-challenge/day18/reminder_server.py", line 144, in main
+  |     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
+  |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/sterx/.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/contextlib.py", line 235, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/mcp/server/stdio.py", line 85, in stdio_server
+  |     async with anyio.create_task_group() as tg:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/mcp/server/stdio.py", line 88, in stdio_server
+    |     yield read_stream, write_stream
+    |   File "/home/sterx/code/ai-advent-challenge/day18/reminder_server.py", line 151, in main
+    |     capabilities=server.get_capabilities(
+    |                  ~~~~~~~~~~~~~~~~~~~~~~~^
+    |         notification_options=None,
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         experimental_capabilities={},
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ),
+    |     ^
+    |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/mcp/server/lowlevel/server.py", line 217, in get_capabilities
+    |     tools_capability = types.ToolsCapability(listChanged=notification_options.tools_changed)
+    |                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'NoneType' object has no attribute 'tools_changed'
+    +------------------------------------
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/sterx/code/ai-advent-challenge/day18/reminder_agent.py", line 231, in <module>
+  |     asyncio.run(main())
+  |     ~~~~~~~~~~~^^^^^^^^
+  |   File "/home/sterx/.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py", line 195, in run
+  |     return runner.run(main)
+  |            ~~~~~~~~~~^^^^^^
+  |   File "/home/sterx/.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py", line 118, in run
+  |     return self._loop.run_until_complete(task)
+  |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  |   File "/home/sterx/.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+  |     return future.result()
+  |            ~~~~~~~~~~~~~^^
+  |   File "/home/sterx/code/ai-advent-challenge/day18/reminder_agent.py", line 219, in main
+  |     async with stdio_client(server_params) as (read, write):
+  |                ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  |   File "/home/sterx/.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/contextlib.py", line 235, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/mcp/client/stdio/__init__.py", line 183, in stdio_client
+  |     anyio.create_task_group() as tg,
+  |     ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Exception Group Traceback (most recent call last):
+    |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/mcp/client/stdio/__init__.py", line 189, in stdio_client
+    |     yield read_stream, write_stream
+    |   File "/home/sterx/code/ai-advent-challenge/day18/reminder_agent.py", line 220, in main
+    |     async with ClientSession(read, write) as session:
+    |                ~~~~~~~~~~~~~^^^^^^^^^^^^^
+    |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/mcp/shared/session.py", line 238, in __aexit__
+    |     return await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+    |     raise BaseExceptionGroup(
+    |         "unhandled errors in a TaskGroup", self._exceptions
+    |     ) from None
+    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+    +-+---------------- 1 ----------------
+      | Traceback (most recent call last):
+      |   File "/home/sterx/code/ai-advent-challenge/day18/reminder_agent.py", line 221, in main
+      |     await session.initialize()
+      |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/mcp/client/session.py", line 171, in initialize
+      |     result = await self.send_request(
+      |              ^^^^^^^^^^^^^^^^^^^^^^^^
+      |     ...<16 lines>...
+      |     )
+      |     ^
+      |   File "/home/sterx/code/ai-advent-challenge/day18/.venv/lib/python3.13/site-packages/mcp/shared/session.py", line 306, in send_request
+      |     raise McpError(response_or_error.error)
+      | mcp.shared.exceptions.McpError: Connection closed
+      +------------------------------------
