@@ -1,0 +1,11 @@
+[project]
+name = "day19"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mcp>=1.26.0",
+    "starlette>=0.52.1",
+    "uvicorn>=0.41.0",
+]
