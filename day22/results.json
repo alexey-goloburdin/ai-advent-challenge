@@ -1,0 +1,152 @@
+[
+  {
+    "id": 1,
+    "question": "как в salesbeat найти идентификатор населённого пункта по его названию, напиши минимальный код на python с urllib",
+    "expected": "используя сервис https://app.salesbeat.pro/api/v1/get_cities",
+    "expected_source": "salesbeat.md / 1. Поиск местоположения",
+    "answer_plain": "Для выполнения задачи с использованием `urllib` в Python, вы можете обратиться к API Salesbeat, чтобы получить идентификатор населённого пункта по его названию. Вот минимальный код, который демонстрирует, как сделать это:\n\n```python\nimport urllib.request\nimport urllib.parse\nimport json\n\n# Название населённого пункта, которое вы хотите найти\ncity_name = \"Москва\"\n\n# Ваш API-ключ, зарегистрируйтесь в Salesbeat, чтобы его получить\napi_key = \"ваш_api_ключ\"\n\n# URL для поиска населённого пункта\nurl = f\"https://api.salesbeat.pro/v1/get_cities?token={api_key}&query={urllib.parse.quote(city_name)}\"\n\n# Выполнение запроса\ntry:\n    with urllib.request.urlopen(url) as response:\n        data = json.loads(response.read().decode())\n        \n        # Проверка, есть ли данные о городах\n        if data.get(\"results\"):\n            for city in data[\"results\"]:\n                print(f\"Город: {city['name']}, ID: {city['city_code']}\")\n        else:\n            print(\"Город не найден.\")\nexcept Exception as e:\n    print(f\"Ошибка: {e}\")\n```\n\n### Объяснение кода:\n1. `city_name` — название населённого пункта, который вы хотите найти.\n2. `api_key` — ваш личный API-ключ от Salesbeat. Его необходимо зарегистрировать на платформе Salesbeat.\n3. `urllib.parse.quote(city_name)` используется для кодирования названия города для URL, чтобы избежать проблем с символами (например, пробелы, кириллица).\n4. Выполняется HTTP-запрос с использованием `urllib.request.urlopen`.\n5. Результат запроса декодируется в JSON, и из ответа вытаскивается город и его идентификатор.\n\nПеред запуском убедитесь, что у вас есть действующий API-ключ и что вы активировали доступ к API Salesbeat в вашем аккаунте.",
+    "answer_rag": "Для поиска идентификатора населённого пункта по его названию через API Salesbeat можно использовать библиотеку `urllib`. Вот минимальный пример кода:\n\n```python\nimport urllib.parse\nimport urllib.request\nimport json\n\n# Параметры\ntoken = \"ваш_API_токен\"\ncity_name = \"Москва\"  # Название города для поиска\n\n# Формирование строки запроса\nbase_url = \"https://app.salesbeat.pro/api/v1/get_cities\"\nparams = {\n    \"token\": token,\n    \"city\": city_name\n}\nquery_string = urllib.parse.urlencode(params)\nurl = f\"{base_url}?{query_string}\"\n\n# Выполнение запроса\ntry:\n    with urllib.request.urlopen(url) as response:\n        data = json.load(response)\n        if data.get(\"success\"):\n            for city in data.get(\"cities\", []):\n                print(f\"Название: {city['name']}, ID: {city['id']}, Почтовый индекс: {city['postalcode']}\")\n        else:\n            print(\"Ошибка:\", data.get(\"error_message\"))\nexcept Exception as e:\n    print(\"Произошла ошибка:\", e)\n```\n\n### Что делает код:\n1. Формирует строку запроса с передачей `token` и имени города `city_name`.\n2. Отправляет запрос на API Salesbeat с использованием `urllib.request`.\n3. Парсит полученный ответ в формате JSON и извлекает информацию о найденных населённых пунктах, включая их название, уникальный идентификатор (ID) и почтовый индекс.\n\nЗамените `ваш_API_токен` на реальный токен из панели администратора Salesbeat для корректной работы.",
+    "retrieved_sources": [
+      "salesbeat.md / # API Salesbeat (score=0.791)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.769)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (part 3) (score=0.768)",
+      "salesbeat.md / # API Salesbeat / ## 1. Поиск местоположения (score=0.764)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (part 2) (score=0.763)"
+    ]
+  },
+  {
+    "id": 2,
+    "question": "от каких родителей родился Бим, который чёрное ухо",
+    "expected": "от породистых сеттеров с большой родословной",
+    "expected_source": "bim.md / 1. ДВОЕ В ОДНОЙ КОМНАТЕ",
+    "answer_plain": "Бим из повести Гавриила Троепольского «Белый Бим Чёрное ухо» родился у родителей-охотничьих собак породы шотландский сеттер. Его отец был черного окраса, а мать – белого с рыжими пятнами. Но сам Бим из-за сбоя генетики родился необычного окраса: его шерсть была белой с черным ухом, что сделало его особенным и отклоняющимся от стандарта породы. Именно из-за этого его не признали на выставке, но это не помешало ему быть преданным и умным животным.",
+    "answer_rag": "Бим родился от породистых родителей шотландских сеттеров (сеттер-гордонов) с длинной родословной.",
+    "retrieved_sources": [
+      "bim.md / # 1. ДВОЕ В ОДНОЙ КОМНАТЕ (part 8) (score=0.822)",
+      "salesbeat.md / # API Salesbeat / ## 1. Поиск местоположения (score=0.819)",
+      "bim.md / # 1. ДВОЕ В ОДНОЙ КОМНАТЕ (part 27) (score=0.818)",
+      "bim.md / # 1. ДВОЕ В ОДНОЙ КОМНАТЕ (part 31) (score=0.818)",
+      "bim.md / # 3. ПЕРВЫЙ НЕПРИЯТЕЛЬ БИМА (part 3) (score=0.818)"
+    ]
+  },
+  {
+    "id": 3,
+    "question": "как звали хозяина бима чёрное ухо",
+    "expected": "Иван Иваныч",
+    "expected_source": "bim.md / 1. ДВОЕ В ОДНОЙ КОМНАТЕ",
+    "answer_plain": "Хозяина пса по кличке Бим, героя известного романа «Белый Бим Чёрное ухо», звали Иван Иванович. Он был пожилым мужчиной, добрым и интеллигентным. Иван Иванович любил природу, был честным и искренним человеком, а его отношения с Бимом были основаны на глубокой любви и привязанности.",
+    "answer_rag": "Хозяина Бима звали Иван Иваныч.",
+    "retrieved_sources": [
+      "bim.md / # 3. ПЕРВЫЙ НЕПРИЯТЕЛЬ БИМА (part 7) (score=0.859)",
+      "bim.md / # 4. ЖЕЛТЫЙ ЛИСТ (part 2) (score=0.827)",
+      "bim.md / # 1. ДВОЕ В ОДНОЙ КОМНАТЕ (part 24) (score=0.827)",
+      "bim.md / # 2. ВЕСЕННИЙ ЛЕС (part 11) (score=0.826)",
+      "bim.md / # 4. ЖЕЛТЫЙ ЛИСТ (part 8) (score=0.826)"
+    ]
+  },
+  {
+    "id": 4,
+    "question": "как передаётся токен в api salesbeat?",
+    "expected": "query параметром",
+    "expected_source": "salesbeat.md / 1. Поиск местоположения",
+    "answer_plain": "В API **Salesbeat** передача токена осуществляется через HTTP-запросы, и он обычно передаётся в заголовке запроса либо как часть тела запроса в зависимости от типа используемого эндпоинта. Технически токен служит идентификатором клиента, подтверждающим авторизацию и доступ к функционалу API.\n\n### Пример использования токена в API Salesbeat:\n1. **Передача токена в заголовке запроса (Header):**\n   Чаще всего, токен передаётся в заголовке запроса. Для этого нужно указать заголовок `Token`. Пример:\n\n   ```\n   POST https://api.salesbeat.pro/v1/some_endpoint\n   Content-Type: application/json\n   Token: YOUR_ACCESS_TOKEN\n   ```\n\n2. **Передача токена в теле запроса:**\n   Для некоторых запросов Salesbeat может требоваться передача токена как параметра в теле JSON. Пример структуры тела:\n\n   ```json\n   {\n     \"token\": \"YOUR_ACCESS_TOKEN\",\n     \"some_other_param\": \"value\"\n   }\n   ```\n\n### Где получить токен:\n- Токен предоставляется вам при регистрации в системе Salesbeat. Он обычно находится в личном кабинете.\n- Храните токен в безопасности, чтобы предотвратить его использование третьими лицами.\n\nРекомендую ознакомиться с официальной документацией Salesbeat API, чтобы уточнить требования для вашего конкретного случая, так как могут быть нюансы для разных эндпоинтов.",
+    "answer_rag": "Токен передаётся как query-параметр с названием `token` во всех запросах к API Salesbeat. Например:\n\n```\nhttps://app.salesbeat.pro/api/v1/get_metro_stations?token=xxx&city_id=0c5b2444-70a0-4932-980c-b4dc0d3f02b5\n```\n\n`xxx` здесь — это значение токена, которое можно получить в панели администратора Salesbeat в разделе «Магазины».",
+    "retrieved_sources": [
+      "salesbeat.md / # API Salesbeat (score=0.784)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.751)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.751)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (part 3) (score=0.720)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (part 4) (score=0.717)"
+    ]
+  },
+  {
+    "id": 5,
+    "question": "умеет ли salesbeat искать город по ip, если да как это делать в api?",
+    "expected": "да, используя сервис https://app.salesbeat.pro/api/v1/get_cities",
+    "expected_source": "salesbeat.md / 1. Поиск местоположения",
+    "answer_plain": "Salesbeat умеет определять город пользователя по IP-адресу. Для этого используется их API. Чтобы получить город по IP, нужно сделать запрос к методу, который предоставляет информацию о местоположении клиента.\n\nНа актуальный момент (по состоянию на 2023 год) для работы с определением города по IP используется запрос `delivery_points`, который автоматически подтягивает данные о городе клиента. Также можно использовать вызов метода для определения информации через данные GeoIP.\n\nПример работы с API Salesbeat (определение города по IP):\n1. Зарегистрируйтесь в Salesbeat и получите API-ключ.\n2. Отправьте запрос к API с указанным IP-адресом (если это требуется в явной форме) или используйте автоматическое определение (если IP передается из запроса автоматически).\n3. Получите ответ, содержащий данные о городе.\n\nПример использования API для этого:\n\n### Шаг 1. Формируйте запрос на определение местоположения.\nНа стороне клиента запрос может выглядеть следующим образом:\n\n```bash\ncurl -X POST https://api.salesbeat.pro/v1/location \\\n-H \"Content-Type: application/json\" \\\n-H \"X-Authorization: API_KEY\" \\\n-d '{}' \n```\n\n*Здесь ключ `API_KEY` замените на ваш реальный API-ключ.*\n\n### Шаг 2. Получите ответ в формате JSON:\nAPI вернет информацию, включая определенный город. Типичный ответ:\n\n```json\n{\n    \"success\": true,\n    \"data\": {\n        \"city\": {\n            \"kladr_id\": \"7700000000000\",\n            \"name\": \"Москва\",\n            \"type\": \"г\",\n            \"type_full\": \"город\",\n            \"fias_id\": \"d66e189f-e3ac-49c9-ab3f-5c1123781d61\",\n            \"region\": {\n                \"kladr_id\": \"7700000000000\",\n                \"name\": \"Москва\",\n                \"type\": \"г\",\n                \"type_full\": \"город\",\n                \"fias_id\": \"d66e189f-e3ac-49c9-ab3f-5c1123781d61\"\n            }\n        }\n    }\n}\n```\n\n### Дополнительные замечания:\n- В некоторых случаях местоположение может не определиться точно, особенно если используется VPN или IP определен неверно.\n- Рекомендуется использовать этот метод как вспомогательный и позволять клиенту корректировать автоматически определенный город.\n\nДетальная документация API находится в [официальной документации Salesbeat](https://app.salesbeat.pro/). Она содержит актуальные примеры.",
+    "answer_rag": "Да, *Salesbeat* умеет искать город по IP-адресу. Для этого необходимо использовать метод **\"Поиск местоположения\"** и указать параметр `ip` в запросе.\n\nПример запроса:\n\n```\nhttps://app.salesbeat.pro/api/v1/get_cities?token=xxx&ip=176.59.47.155\n```\n\nГде:\n- `token` — ваш API-токен, который можно получить в панели администратора Salesbeat.\n- `ip` — IP-адрес посетителя, по которому производится поиск населённого пункта.\n\nЭтот запрос вернёт данные о местоположении, включая название города, его уникальный код (`id`), почтовый индекс почтового отделения и регион.",
+    "retrieved_sources": [
+      "salesbeat.md / # API Salesbeat (score=0.763)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.747)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.733)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (part 4) (score=0.732)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (part 1) (score=0.725)"
+    ]
+  },
+  {
+    "id": 6,
+    "question": "напиши минимальный python код который получает из api salesbeat станции метро города с известным идентификатором, используй urllib",
+    "expected": "обращение к сервису https://app.salesbeat.pro/api/v1/get_metro_stations",
+    "expected_source": "salesbeat.md / 6. Получение справочника станций метро",
+    "answer_plain": "Чтобы использовать `urllib` в Python для взаимодействия с API Salesbeat и получения списка станций метро города по известному идентификатору, можно написать следующий минимальный код:\n\n```python\nimport json\nimport urllib.request\n\n# Известный идентификатор города\ncity_id = 123  # замените 123 на реальный ID города\n\n# URL для запроса к API Salesbeat\nurl = f\"https://api.salesbeat.ru/metropolitan_stations?city_id={city_id}\"\n\n# Выполнение GET-запроса\ntry:\n    with urllib.request.urlopen(url) as response:\n        # Чтение данных из API\n        data = response.read()\n        # Декодирование JSON-ответа\n        stations = json.loads(data)\n        # Вывод результата\n        print(stations)\nexcept Exception as e:\n    print(f\"Произошла ошибка: {e}\")\n```\n\n### Пояснение:\n1. **Замена `city_id`:** Замените значение `city_id` на идентификатор города, который вам известен.\n2. **Библиотека `urllib`:** Используется для выполнения HTTP-запросов и получения данных через API.\n3. **Парсинг JSON:** Метод `json.loads` преобразует текст ответа в словарь или список Python.\n4. **Обработка исключений:** Код включает базовую обработку исключений на случай ошибок подключения или некорректного ответа API.\n\nЕсли API требует авторизации (например, через API-ключ), вам нужно будет добавить заголовки к запросу. Вы можете уточнить требования API в его документации.",
+    "answer_rag": "Для запроса станций метро города с использованием API Salesbeat и библиотеки `urllib`, минимальный Python код может выглядеть следующим образом:\n\n```python\nimport urllib.request\nimport json\n\n# Ваш API-токен\napi_token = \"ваш_токен\"\n# Уникальный идентификатор города\ncity_id = \"0c5b2444-70a0-4932-980c-b4dc0d3f02b5\"\n\n# Формирование запроса\nurl = f\"https://app.salesbeat.pro/api/v1/get_metro_stations?token={api_token}&city_id={city_id}\"\n\n# Отправка запроса и получение ответа\nwith urllib.request.urlopen(url) as response:\n    data = response.read().decode('utf-8')\n    result = json.loads(data)\n\n# Проверка результата\nif result.get(\"success\"):\n    metro_stations = result.get(\"metro_stations\", [])\n    print(\"Станции метро:\")\n    for station in metro_stations:\n        print(f\"Название: {station['name']}, Цвет: {station['color']}\")\nelse:\n    print(\"Ошибка:\", result.get(\"error_message\", \"Неизвестная ошибка\"))\n```\n\nПеред запуском замените `ваш_токен` на ваш реальный API-токен. Если у города есть станции метро, они будут выведены в консоль с их названиями и цветами веток.",
+    "retrieved_sources": [
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.770)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.763)",
+      "salesbeat.md / # API Salesbeat (score=0.759)",
+      "salesbeat.md / # API Salesbeat / ### Выходные параметры (score=0.757)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (part 2) (score=0.754)"
+    ]
+  },
+  {
+    "id": 7,
+    "question": "напиши минимальный python код который получает из api salesbeat станции метро города с известным названием, используй urllib",
+    "expected": "обращение к сервису https://app.salesbeat.pro/api/v1/get_metro_stations и https://app.salesbeat.pro/api/v1/get_cities",
+    "expected_source": "salesbeat.md / 6. Получение справочника станций метро / 1. Поиск местоположения",
+    "answer_plain": "Для получения списка станций метро конкретного города с использованием API Salesbeat и библиотеки `urllib`, вам нужно будет зарегистрироваться на платформе Salesbeat (если еще не сделали этого) и получить API-ключ. Пример ниже показывает минимальный код для выполнения запроса. Предполагается, что у вас есть название города, например, \"Москва\".\n\n```python\nimport urllib.request\nimport urllib.parse\nimport json\n\ndef get_metro_stations(city_name, api_key):\n    url = \"https://api.salesbeat.pro/v1/get-metro/\"\n    \n    # Создаем параметры запроса\n    params = urllib.parse.urlencode({'city': city_name, 'token': api_key})\n\n    # Выполняем запрос\n    with urllib.request.urlopen(f\"{url}?{params}\") as response:\n        data = response.read()\n        result = json.loads(data.decode('utf-8'))\n        return result\n\n# Укажите API-ключ и название города\napi_key = \"ваш_API_ключ\"\ncity_name = \"Москва\"\n\nstations = get_metro_stations(city_name, api_key)\nprint(stations)\n```\n\n### Пояснения:\n1. **URL API:** Указываем базовый URL `https://api.salesbeat.pro/v1/get-metro/`, согласно документации Salesbeat.\n2. **API-ключ:** Вы обязаны указать ваш персональный ключ для аутентификации в API.\n3. **Запрос и обработка:** Результат возвращается в формате JSON, который мы преобразуем в Python-объект с помощью `json.loads`.\n4. **Вывод ответа:** Список станций метро или сообщение об ошибке.\n\n### Важное:\n- Проверьте документацию Salesbeat API, чтобы быть уверенным в правильности URL и параметров.\n- Если API-ключ отсутствует или введены неверные данные, система вернет ошибку.",
+    "answer_rag": "Для получения станций метро города с известным названием через API Salesbeat с использованием `urllib`, необходимо сначала выполнить два этапа:\n\n1. Получить уникальный `city_id` города по его названию.\n2. Используя `city_id`, запросить список станций метро.\n\nНиже представлен минимальный пример кода:\n\n```python\nimport json\nimport urllib.request\n\n# Укажите API-токен (получите его в панели администратора Salesbeat)\nAPI_TOKEN = \"ваш_токен\"\n\ndef get_city_id_by_name(city_name):\n    \"\"\"Получить id города по названию\"\"\"\n    url = f\"https://app.salesbeat.pro/api/v1/get_cities?token={API_TOKEN}&city={city_name}\"\n    with urllib.request.urlopen(url) as response:\n        data = json.loads(response.read())\n        if data.get(\"success\") and data.get(\"cities\"):\n            # Возвращаем ID первого найденного города\n            return data[\"cities\"][0][\"id\"]\n        else:\n            raise ValueError(f\"Не найден город с названием '{city_name}'\")\n\ndef get_metro_stations(city_id):\n    \"\"\"Получить список станций метро по ID города\"\"\"\n    url = f\"https://app.salesbeat.pro/api/v1/get_metro_stations?token={API_TOKEN}&city_id={city_id}\"\n    with urllib.request.urlopen(url) as response:\n        data = json.loads(response.read())\n        if data.get(\"success\"):\n            return data.get(\"metro_stations\", [])\n        else:\n            raise ValueError(\"Не удалось получить станции метро для указанного города\")\n\n# Пример использования\ncity_name = \"Москва\"  # Укажите название города\ntry:\n    city_id = get_city_id_by_name(city_name)\n    metro_stations = get_metro_stations(city_id)\n    print(f\"Станции метро города {city_name}:\")\n    for station in metro_stations:\n        print(f\"- {station['name']} ({station['color']})\")\nexcept Exception as e:\n    print(f\"Ошибка: {e}\")\n```\n\n### Пояснение:\n1. **Функция `get_city_id_by_name`**:\n   - Выполняет запрос на получение `city_id` по названию города.\n   - Используется API `get_cities`.\n\n2. **Функция `get_metro_stations`**:\n   - Выполняет запрос для получения станций метро города по его `city_id`.\n   - Используется API `get_metro_stations`.\n\n3. **Пример использования**:\n   - Указываем название города (например, \"Москва\") в переменной `city_name`.\n   - Печатаем список станций метро (с отображением названия станции и цвета ветки метро).\n\n### Зависимости:\n- Python стандартный модуль `urllib.request` для работы с HTTP-запросами.\n- `json` для обработки данных в формате JSON.",
+    "retrieved_sources": [
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.776)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.769)",
+      "salesbeat.md / # API Salesbeat (score=0.768)",
+      "salesbeat.md / # API Salesbeat / ### Выходные параметры (score=0.764)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (part 2) (score=0.761)"
+    ]
+  },
+  {
+    "id": 8,
+    "question": "получи службы доставки в salesbeat, напиши минимальный код на python с urllib",
+    "expected": "описание или код доступа к https://app.salesbeat.pro/api/v1/get_all_delivery_methods",
+    "expected_source": "salesbeat.md / 2. Список всех служб доставки",
+    "answer_plain": "Вот пример минимального Python-кода для получения списка служб доставки из Salesbeat с использованием библиотеки `urllib`. Вы можете заменить строку `API_KEY` на ваш реальный API-ключ.\n\n```python\nimport urllib.request\nimport json\n\nAPI_KEY = 'ваш_ключ_от_salesbeat'\nURL = 'https://app.salesbeat.pro/api/v1/get_delivery'\n\n# Подготовка данных для запроса\ndata = json.dumps({\n    \"token\": API_KEY,\n    \"city_code\": \"77000000000\"  # Код города (пример - Москва)\n}).encode('utf-8')\n\n# Отправка POST-запроса\nrequest = urllib.request.Request(URL, data=data, headers={'Content-Type': 'application/json'})\nresponse = urllib.request.urlopen(request)\n\n# Чтение ответа\nresponse_data = json.loads(response.read().decode('utf-8'))\nprint(response_data)\n```\n\n### Объяснение кода:\n1. **Импорт библиотеки**: Используется `urllib` для выполнения HTTP-запросов и `json` для работы с JSON-данными.\n2. **API-ключ**: Вставьте в переменную `API_KEY` свой уникальный токен, полученный из Salesbeat.\n3. **Форматирование запроса**: Данные сформированы в JSON-формате согласно требованиям API.\n4. **POST-запрос**: Отправляется запрос на указанный URL.\n5. **Результат**: Ответ от сервиса декодируется из JSON и выводится на экран.\n\nПожалуйста, ознакомьтесь с официальной документацией Salesbeat, чтобы уточнить возможные параметры (например, код города).",
+    "answer_rag": "Для получения списка всех служб доставки в Salesbeat с использованием `urllib` на Python, можно использовать следующий минимальный код. Требуется передать API-токен магазина в запросе:\n\n```python\nimport urllib.request\n\n# Замените 'your_api_token' на реальный токен API вашего магазина\napi_token = 'your_api_token'\nurl = f'https://app.salesbeat.pro/api/v1/get_all_delivery_methods?token={api_token}'\n\ntry:\n    # Отправляем GET-запрос\n    with urllib.request.urlopen(url) as response:\n        # Читаем и декодируем ответ\n        response_data = response.read().decode('utf-8')\n        print(response_data)\nexcept Exception as e:\n    print(f\"Ошибка при выполнении запроса: {e}\")\n```\n\nЭтот код отправляет GET-запрос по URL-адресу API Salesbeat для получения списка всех служб доставки. Ответ будет в формате JSON и выведен в консоль. Убедитесь, что ваш токен (`your_api_token`) корректно указан.",
+    "retrieved_sources": [
+      "salesbeat.md / # API Salesbeat (score=0.773)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (part 2) (score=0.750)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.748)",
+      "salesbeat.md / # API Salesbeat / ### Выходные параметры (part 3) (score=0.741)",
+      "salesbeat.md / # API Salesbeat / ### Выходные параметры (score=0.739)"
+    ]
+  },
+  {
+    "id": 9,
+    "question": "что думала собака бим (белый бим чёрное ухо) про бумажки людей",
+    "expected": "Бим  давно  заметил,  что  люди  обмениваются  какими-то   бумажками, пахнущими не разберешь чем...",
+    "expected_source": "bim.md / 4. ЖЕЛТЫЙ ЛИСТ",
+    "answer_plain": "В книге Гавриила Троепольского \"Белый Бим Черное ухо\" собака Бим воспринимает мир через ощущения, действия людей и свою интуицию, которая основана на любви, преданности и честности. Бумаги, деньги и документы людей, скорее всего, для Бима не имели никакого значения, так как их ценность – это конструкция человеческого общества, недоступная пониманию собаки. Для Бима куда более важны были искренние эмоции, запахи, доверие и доброта. Возможно, он воспринимал человеческие \"бумажки\" лишь как некие элементы, отвлекающие людей от истинных, важных вещей, таких как взаимопонимание или близость друг с другом.",
+    "answer_rag": "Собака Бим не понимал, что значат бумажки, которыми люди обмениваются, но он замечал, что они имеют для людей какую-то особую ценность. Бим чувствовал их запахи: некоторые пахли кровью, хлебом, колбасой или даже множеством рук. Он видел, как хозяин давал одну такую бумажку водителю автобуса, и они тут же стали друзьями, что показалось Биму непонятным. Для него \"магическая сила\" этих бумажек была недоступна, и он даже смутно не догадывался, насколько важную роль они играют в жизни людей.",
+    "retrieved_sources": [
+      "bim.md / # 4. ЖЕЛТЫЙ ЛИСТ (part 3) (score=0.863)",
+      "bim.md / # 3. ПЕРВЫЙ НЕПРИЯТЕЛЬ БИМА (part 6) (score=0.852)",
+      "bim.md / # 3. ПЕРВЫЙ НЕПРИЯТЕЛЬ БИМА (part 11) (score=0.850)",
+      "bim.md / # 2. ВЕСЕННИЙ ЛЕС (part 8) (score=0.844)",
+      "bim.md /  (part 2) (score=0.840)"
+    ]
+  },
+  {
+    "id": 10,
+    "question": "как посчитать стоимость доставки конкретным способом в конкретный город используя api salesbeat",
+    "expected": "используя https://app.salesbeat.pro/api/v1/get_delivery_price",
+    "expected_source": "salesbeat.md / 5. Расчёт стоимости доставки",
+    "answer_plain": "Salesbeat предоставляет API для расчета стоимости и сроков доставки. Чтобы воспользоваться его функциями, нужно выполнить несколько шагов:\n\n### 1. Регистрация и доступ к API\nДля начала работы с API Salesbeat вам нужно зарегистрироваться на их платформе и получить API-ключ, который понадобится для выполнения запросов.\n\n### 2. Методы API для расчёта доставки\nДля расчета стоимости доставки используется метод `delivery/get-array`, который предоставляет информацию о способах доставки в зависимости от города, размеров и веса груза.\n\n#### Пример алгоритма действий:\n\n1. **Определите входные данные:**\n   - Город или индекс (destination): `city_code` или `postal_code`.\n   - Габариты товара (длина, ширина, высота), вес и стоимость: `weight`, `length`, `width`, `height`, `price`.\n   - Начальный адрес (если нужно): `origin_city_code` или конкретная точка отправления.\n\n2. **Отправьте запрос к API на расчёт параметров доставки:**\n   Запрос составляется к методу `delivery/get-array` с передачей необходимых параметров.\n\n#### Пример запроса:\n\n```bash\nPOST https://api.salesbeat.pro/delivery/get-array\nContent-Type: application/json\nAuthorization: \"Token API-ключ\" \n\n{\n    \"token\": \"ВАШ_API_КЛЮЧ\",\n    \"city_code\": \"7700000000000\",  # Код города назначения (или можно использовать почтовый индекс в `postal_code`)\n    \"products\": [                 # Список товаров\n        {\n            \"weight\": 1.5,        # Вес в кг\n            \"length\": 20,        # Длина в см\n            \"width\": 10,         # Ширина в см\n            \"height\": 5,         # Высота в см\n            \"price\": 1000        # Стоимость товара\n        }\n    ]\n}\n```\n\n3. **Обработка ответа API:**\n   В ответ на запрос вы получите JSON-объект с доступными способами доставки, их стоимостью, сроками и другой информацией.\n\n#### Пример ответа:\n```json\n{\n    \"status\": true,\n    \"delivery_methods\": [\n        {\n            \"delivery_method_id\": 123,\n            \"delivery_service_name\": \"Курьерская служба\",\n            \"delivery_type\": \"Курьерская доставка\",\n            \"price\": 350,\n            \"delivery_period\": \"2-4 дня\",\n            \"is_available\": true\n        },\n        {\n            \"delivery_method_id\": 124,\n            \"delivery_service_name\": \"Почта\",\n            \"delivery_type\": \"Почтовая доставка\",\n            \"price\": 200,\n            \"delivery_period\": \"5-7 дней\",\n            \"is_available\": true\n        }\n    ]\n}\n```\n\nКаждый способ доставки представлен отдельным объектом, из которого можно получить стоимость (`price`) и сроки доставки (`delivery_period`).\n\n### 3. Основные параметры для запроса\nПри составлении запроса важны следующие параметры:\n- `city_code` или `postal_code` — указывает пункт назначения;\n- `products` — массив товаров (для расчета доставки нескольких товаров);\n- `weight`, `length`, `width`, `height`, `price` — характеристики товара.\n\n### 4. Тестирование\nSalesbeat предоставляет [песочницу для тестов](https://my.salesbeat.pro/), где можно экспериментировать с запросами.\n\n### 5. Документация\nОбязательно изучите [официальную документацию Salesbeat API](https://app.salesbeat.pro/api-doc), где приведены актуальные примеры и возможные дополнительные параметры.\n\n### Итог\nС помощью метода `delivery/get-array` можно рассчитать стоимость и сроки доставки для конкретного города с учетом характеристик товаров. Повторю основные шаги: зарегистрируйтесь, получите API-ключ, отправьте запрос с введением параметров, обработайте ответ и выберите подходящий способ доставки.",
+    "answer_rag": "Для расчёта стоимости доставки конкретным способом в конкретный город необходимо воспользоваться функцией **\"Расчёт стоимости доставки\"** в API Salesbeat. Однако описание данного метода в предоставленном контексте отсутствует. \n\nРекомендую проверить документацию API Salesbeat версии 1.4 или обратиться к технической поддержке Salesbeat за подробной информацией.",
+    "retrieved_sources": [
+      "salesbeat.md / # API Salesbeat (score=0.750)",
+      "salesbeat.md / # API Salesbeat / ## 10. Фильтрация активных ПВЗ из списка (score=0.745)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.741)",
+      "salesbeat.md / # API Salesbeat / ### Входные параметры (score=0.739)",
+      "salesbeat.md / # API Salesbeat / ## 8. Синхронизация способов оплаты (score=0.736)"
+    ]
+  }
+]

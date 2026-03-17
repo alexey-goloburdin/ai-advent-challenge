@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "как в salesbeat найти идентификатор населённого пункта по его названию, напиши минимальный код на python с urllib",
+    "expected": "используя сервис https://app.salesbeat.pro/api/v1/get_cities",
+    "source": "salesbeat.md / 1. Поиск местоположения"
+  },
+  {
+    "id": 2,
+    "question": "от каких родителей родился Бим, который чёрное ухо",
+    "expected": "от породистых сеттеров с большой родословной",
+    "source": "bim.md / 1. ДВОЕ В ОДНОЙ КОМНАТЕ"
+  },
+  {
+    "id": 3,
+    "question": "как звали хозяина бима чёрное ухо",
+    "expected": "Иван Иваныч",
+    "source": "bim.md / 1. ДВОЕ В ОДНОЙ КОМНАТЕ"
+  },
+  {
+    "id": 4,
+    "question": "как передаётся токен в api salesbeat?",
+    "expected": "query параметром",
+    "source": "salesbeat.md / 1. Поиск местоположения"
+  },
+  {
+    "id": 5,
+    "question": "умеет ли salesbeat искать город по ip, если да как это делать в api?",
+    "expected": "да, используя сервис https://app.salesbeat.pro/api/v1/get_cities",
+    "source": "salesbeat.md / 1. Поиск местоположения"
+  },
+  {
+    "id": 6,
+    "question": "напиши минимальный python код который получает из api salesbeat станции метро города с известным идентификатором, используй urllib",
+    "expected": "обращение к сервису https://app.salesbeat.pro/api/v1/get_metro_stations",
+    "source": "salesbeat.md / 6. Получение справочника станций метро"
+  },
+  {
+    "id": 7,
+    "question": "напиши минимальный python код который получает из api salesbeat станции метро города с известным названием, используй urllib",
+    "expected": "обращение к сервису https://app.salesbeat.pro/api/v1/get_metro_stations и https://app.salesbeat.pro/api/v1/get_cities",
+    "source": "salesbeat.md / 6. Получение справочника станций метро / 1. Поиск местоположения"
+  },
+  {
+    "id": 8,
+    "question": "получи службы доставки в salesbeat, напиши минимальный код на python с urllib",
+    "expected": "описание или код доступа к https://app.salesbeat.pro/api/v1/get_all_delivery_methods",
+    "source": "salesbeat.md / 2. Список всех служб доставки"
+  },
+  {
+    "id": 9,
+    "question": "что думала собака бим (белый бим чёрное ухо) про бумажки людей",
+    "expected": "Бим  давно  заметил,  что  люди  обмениваются  какими-то   бумажками, пахнущими не разберешь чем...",
+    "source": "bim.md / 4. ЖЕЛТЫЙ ЛИСТ"
+  },
+  {
+    "id": 10,
+    "question": "как посчитать стоимость доставки конкретным способом в конкретный город используя api salesbeat",
+    "expected": "используя https://app.salesbeat.pro/api/v1/get_delivery_price",
+    "source": "salesbeat.md / 5. Расчёт стоимости доставки"
+  }
+]
