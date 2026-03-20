@@ -18,15 +18,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--rerank-top-k",     type=int,   default=5,            help="Кол-во чанков после реранкинга")
     p.add_argument("--window",           type=int,   default=3,            help="Соседних чанков с каждой стороны")
 
-    p.add_argument("--min-rerank-score", type=float, default=None,         help="Минимальный rerank score (например -5.0)")
-
+    p.add_argument("--min-rerank-score", type=float, default=None,         help="Минимальный rerank score")
     p.add_argument("--reranker-model",   default=DEFAULT_RERANKER,         help="Cross-encoder модель для реранкинга")
     p.add_argument("--no-rerank",        action="store_true",              help="Отключить реранкинг (только cosine)")
+    p.add_argument("--llm-rerank",       action="store_true",              help="Использовать LLM вместо cross-encoder для реранкинга")
     p.add_argument("--rewrite",          action="store_true",              help="Включить query rewrite")
     p.add_argument("--ollama-host",      default="http://localhost:11434", help="Ollama host")
     p.add_argument("--embed-model",      default="nomic-embed-text",       help="Ollama модель для эмбеддингов")
     p.add_argument("--output",           default="results.json",           help="Куда сохранить результаты")
-    p.add_argument("--llm-rerank", action="store_true", help="Использовать LLM вместо cross-encoder для реранкинга")
     return p
 
 
@@ -34,8 +33,8 @@ def build_parser() -> argparse.ArgumentParser:
 def get_embedding(text: str, host: str, model: str) -> list[float]:
     import urllib.request
 
-
     payload = json.dumps({"model": model, "prompt": text}).encode("utf-8")
+
     req = urllib.request.Request(
         f"{host}/api/embeddings",
         data=payload,
@@ -49,9 +48,7 @@ def get_embedding(text: str, host: str, model: str) -> list[float]:
 
 def format_chunks(chunks: list[dict], with_rerank: bool) -> list[str]:
     result = []
-
     for c in chunks:
-
         score_str = f"cosine={c['score']:.3f}"
         if with_rerank and "rerank_score" in c:
             score_str += f" rerank={c['rerank_score']:.2f}"
@@ -66,25 +63,34 @@ def main() -> None:
     from src.retriever import load_index
     from src.rag import answer_without_rag, answer_with_rag
 
-    reranker_model = None if args.no_rerank else args.reranker_model
+
+    use_llm_rerank = args.llm_rerank
+    reranker_model = None if (args.no_rerank or use_llm_rerank) else args.reranker_model
+
+
+    if args.no_rerank:
+        rerank_label = "выключен (--no-rerank)"
+    elif use_llm_rerank:
+        rerank_label = f"LLM ({args.model})"
+    else:
+        rerank_label = reranker_model
 
     print("=== Загрузка индекса ===")
-
     index = load_index(args.index)
-
     print(f"  Чанков в индексе: {len(index)}")
 
     print("\n=== Загрузка вопросов ===")
     with open(args.questions, "r", encoding="utf-8") as f:
-
         questions = json.load(f)
     print(f"  Вопросов: {len(questions)}")
+
 
     print(f"\n=== Режим ===")
     print(f"  top-k (поиск):    {args.top_k}")
     print(f"  rerank top-k:     {args.rerank_top_k}")
+
     print(f"  window:           {args.window}")
-    print(f"  реранкинг:        {'выключен (--no-rerank)' if args.no_rerank else reranker_model}")
+    print(f"  реранкинг:        {rerank_label}")
     print(f"  query rewrite:    {'да' if args.rewrite else 'нет'}")
     print(f"  min rerank score: {args.min_rerank_score}")
 
@@ -106,6 +112,7 @@ def main() -> None:
             "question": question,
             "expected": expected,
             "expected_source": source,
+
         }
 
 
@@ -113,13 +120,13 @@ def main() -> None:
         print("\n▶ Без RAG...")
         answer_plain = answer_without_rag(question, model=args.model)
         print(f"  {answer_plain}")
-
         result["answer_plain"] = answer_plain
 
         # ── Эмбеддинг вопроса ─────────────────────────────────────
         query_embedding = get_embedding(
             question,
             host=args.ollama_host,
+
             model=args.embed_model,
         )
 
@@ -128,6 +135,7 @@ def main() -> None:
         rag_plain = answer_with_rag(
             question=question,
             query_embedding=query_embedding,
+
             index=index,
             model=args.model,
             top_k=args.top_k,
@@ -135,6 +143,7 @@ def main() -> None:
             reranker_model=None,
             rerank_top_k=args.rerank_top_k,
             rewrite=False,
+            use_llm_rerank=False,
         )
         print(f"  {rag_plain['answer']}")
         plain_sources = format_chunks(rag_plain["chunks"][:args.rerank_top_k], with_rerank=False)
@@ -145,12 +154,14 @@ def main() -> None:
         result["sources_rag_plain"] = plain_sources
 
         # ── С RAG + реранкинг + query rewrite ────────────────────
-        label = "С RAG + реранкинг"
+        label = f"С RAG + реранкинг ({rerank_label})"
+
         if args.rewrite:
             label += " + query rewrite"
         print(f"\n▶ {label}...")
 
         rag_full = answer_with_rag(
+
             question=question,
             query_embedding=query_embedding,
             index=index,
@@ -161,23 +172,25 @@ def main() -> None:
             rerank_top_k=args.rerank_top_k,
             min_rerank_score=args.min_rerank_score,
             rewrite=args.rewrite,
+
+            use_llm_rerank=use_llm_rerank,
         )
 
         if rag_full["rewritten_query"]:
             print(f"  Query rewrite: {rag_full['rewritten_query']}")
 
-
         print(f"  {rag_full['answer']}")
-        full_sources = format_chunks(rag_full["chunks"], with_rerank=not args.no_rerank)
-        print(f"\n  Чанки после реранкинга ({len(full_sources)}):")
+        with_rerank = not args.no_rerank
+        full_sources = format_chunks(rag_full["chunks"], with_rerank=with_rerank)
 
+        print(f"\n  Чанки после реранкинга ({len(full_sources)}):")
         for s in full_sources:
             print(f"    {s}")
 
         result["answer_rag_reranked"] = rag_full["answer"]
-
         result["sources_rag_reranked"] = full_sources
         result["rewritten_query"] = rag_full["rewritten_query"]
+
 
         results.append(result)
 
@@ -186,7 +199,9 @@ def main() -> None:
         json.dump(results, f, ensure_ascii=False, indent=2)
     print(f"\n✓ Результаты сохранены → {args.output}")
 
+
     # ── Итоговая таблица ──────────────────────────────────────────
+
     print(f"\n{'=' * 60}")
     print("ИТОГ")
     print(f"{'=' * 60}")
@@ -195,22 +210,22 @@ def main() -> None:
     for r in results:
         exp_src = r["expected_source"].lower().split("/")[0].strip()
 
+
         found_plain = any(
             exp_src in s.lower()
+
             for s in r.get("sources_rag_plain", [])
         )
         found_reranked = any(
             exp_src in s.lower()
             for s in r.get("sources_rag_reranked", [])
+
         )
         q_short = r["question"][:39]
         print(
-
             f"{r['id']:<4} {q_short:<40} "
-
             f"{'✓' if found_plain else '✗':^8} "
             f"{'✓' if found_reranked else '✗':^8}"
-
         )
 
 
