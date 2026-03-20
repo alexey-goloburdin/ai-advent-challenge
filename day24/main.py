@@ -58,7 +58,7 @@ def print_structured(result: dict) -> None:
     if result.get("quotes"):
         print("\n  Цитаты:")
         for q in result["quotes"]:
-            print(f"    « {q[:200]}{'...' if len(q) > 200 else ''} »")
+            print(f"    « {q}{'...' if len(q) > 200 else ''} »")
     else:
         print("\n  Цитаты: ❌ отсутствуют")
 
