@@ -4,6 +4,7 @@ from typing import Optional, Dict, Any
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 import urllib.request
 import urllib.error
+import requests
 
 from src.logger import get_logger
 
@@ -76,6 +77,58 @@ class LLMClient:
         except Exception as e:
             logger.error(f"Network error during request: {e}")
             raise
+
+    def request_completion_stream(
+        self,
+        messages: list[dict[str, str]],
+        model_name: str = "qwen/qwen3.5-35b-a3b",
+    ) -> str:
+        """Streaming version — prints tokens to stdout as they arrive, returns full text."""
+        payload = {
+            "model": model_name,
+            "input": self._messages_to_input(messages),
+            "reasoning": "off",
+            "temperature": 0.1,
+            "stream": True,
+        }
+
+        full_text: list[str] = []
+        try:
+            with requests.post(
+                self.base_url + "/api/v1/chat",
+                json=payload,
+                stream=True,
+                timeout=300,
+            ) as response:
+                response.raise_for_status()
+                for raw_line in response.iter_lines():
+                    if not raw_line:
+                        continue
+                    line = raw_line.decode("utf-8") if isinstance(raw_line, bytes) else raw_line
+                    if line.startswith(":"):
+                        continue
+                    if line.startswith("data: "):
+                        chunk_str = line[6:]
+                        if chunk_str == "[DONE]":
+                            break
+                        try:
+                            chunk = json.loads(chunk_str)
+                            if chunk.get("type") == "message.delta":
+                                delta = chunk.get("content", "")
+                                if delta:
+                                    print(delta, end="", flush=True)
+                                    full_text.append(delta)
+                        except json.JSONDecodeError:
+                            pass
+        except requests.HTTPError as e:
+            logger.error(f"HTTP Error from LLM API (stream): {e.response.status_code}")
+            raise
+        except Exception as e:
+            logger.error(f"Network error during streaming request: {e}")
+            raise
+
+        print()  # trailing newline
+        return "".join(full_text)
 
     @staticmethod
     def clean_json_output(text: str) -> str:

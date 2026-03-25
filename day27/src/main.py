@@ -61,6 +61,13 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--model",
+        type=str,
+        default="qwen/qwen3.5-35b-a3b",
+        help="Model name to use (default: qwen/qwen3.5-35b-a3b)"
+    )
+
+    parser.add_argument(
         "-f", "--file", 
         type=Path, 
         default=None,
@@ -77,7 +84,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def process_document(client: LLMClient, file_path: Path, history_manager: HistoryManager):
+def process_document(client: LLMClient, file_path: Path, history_manager: HistoryManager, model_name: str = "qwen/qwen3.5-35b-a3b"):
     """Orchestrates document extraction and initial LLM analysis."""
     logger.info(f"Starting processing for file: {file_path}")
 
@@ -99,8 +106,8 @@ Document Content:
             {"role": "user", "content": prompt}
         ]
 
-        raw_response = client.request_completion(messages, model_name="qwen/qwen3.5-35b-a3b")
-        
+        raw_response = client.request_completion_stream(messages, model_name=model_name)
+
         # Clean and parse response
         clean_json = LLMClient.clean_json_output(raw_response)
         
@@ -125,7 +132,7 @@ Document Content:
         logger.exception(f"Unhandled error during document processing: {e}")
 
 
-def run_interactive_mode(client: LLMClient, history_manager: HistoryManager):
+def run_interactive_mode(client: LLMClient, history_manager: HistoryManager, model_name: str = "qwen/qwen3.5-35b-a3b"):
     """Runs the CLI chat loop."""
     logger.info("Entering interactive chat mode.")
 
@@ -155,7 +162,7 @@ def run_interactive_mode(client: LLMClient, history_manager: HistoryManager):
 
             print("\nProcessing...")
             
-            raw_response = client.request_completion(messages, model_name="qwen/qwen3.5-35b-a3b")
+            raw_response = client.request_completion_stream(messages, model_name=model_name)
             clean_json = LLMClient.clean_json_output(raw_response)
             
             try:
@@ -210,13 +217,13 @@ def main():
                 logger.error(f"Specified file does not exist: {args.file}")
                 return 1
             
-            process_document(client, args.file, history_manager)
+            process_document(client, args.file, history_manager, model_name=args.model)
             
             # After processing a file, offer to switch to chat mode for clarification? 
 
             # For now, we exit after doc processing as per "extract requisites" goal.
         else:
-            run_interactive_mode(client, history_manager)
+            run_interactive_mode(client, history_manager, model_name=args.model)
 
     except KeyboardInterrupt:
         logger.info("Program interrupted by user.")
