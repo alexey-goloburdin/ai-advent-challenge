@@ -1,0 +1,8 @@
+[
+  {
+    "id": 1,
+    "question": "как в salesbeat найти идентификатор населённого пункта по его названию, напиши минимальный код на python с urllib",
+    "expected": "используя сервис https://app.salesbeat.pro/api/v1/get_cities",
+    "source": "salesbeat.md / 1. Поиск местоположения"
+  }
+]
