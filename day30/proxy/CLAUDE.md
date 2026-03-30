@@ -26,7 +26,7 @@ curl http://quotes.to.digital:8000/chat \
 
 A minimal FastAPI proxy with a single endpoint `POST /chat` that:
 
-1. **Rate-limits** incoming requests to 2 req/sec using a sliding window deque + `asyncio.Lock`
+1. **Rate-limits** incoming requests to 1 request per 3 seconds using a sliding window deque + `asyncio.Lock`
 2. **Forwards** the request body to the upstream LLM at `https://quotes.to.digital/lm/api/v1/chat`
 3. **Transforms** the JSON response — extracts the first `output[]` item with `type == "message"` and returns its `content` as plain text
 
