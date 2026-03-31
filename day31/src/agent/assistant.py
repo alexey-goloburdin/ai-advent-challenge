@@ -1,52 +1,115 @@
 import json
 import urllib.request
 
-from src.config import LM_STUDIO_BASE
 
-LM_STUDIO_URL = f"{LM_STUDIO_BASE}/v1/embeddings"
-LM_STUDIO_CHAT_URL = f"{LM_STUDIO_BASE}/v1/chat/completions"
-CHAT_MODEL = "qwen/qwen3.5-9b"  # или ваша модель в LM Studio
+LM_STUDIO_CHAT_URL = "http://192.168.56.1:1234/v1/chat/completions"
+CHAT_MODEL = "qwen/qwen3.5-9b"
+
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_docs",
+            "description": "Поиск по документации проекта. Используй когда вопрос касается структуры проекта, API, установки, использования, архитектуры.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Поисковый запрос на русском или английском"
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "git_branch",
+            "description": "Возвращает текущую git-ветку проекта.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    }
+]
+
+
+def _chat(messages: list[dict], tools: list = None) -> dict:
+    payload = {
+        "model": CHAT_MODEL,
+        "messages": messages,
+        "temperature": 0.3,
+        "reasoning": "off",
+    }
+    if tools:
+        payload["tools"] = tools
+
+    data = json.dumps(payload).encode()
+    req = urllib.request.Request(
+        LM_STUDIO_CHAT_URL,
+        data=data,
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read())
 
 
 def ask(
     question: str,
-    rag_chunks: list[dict],
-    git_branch: str,
+    index: list[dict],
+    git_client,
+    retriever_search,
 ) -> str:
-    """Формирует промпт с RAG-контекстом и git-веткой, возвращает ответ LLM."""
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "Ты — ассистент разработчика. Отвечай на вопросы о проекте. "
+                "Используй инструменты чтобы получить нужную информацию. "
+                "Если ответа нет в документации — скажи об этом явно."
+            )
+        },
+        {"role": "user", "content": question}
+    ]
 
-    docs_context = "\n\n---\n\n".join(
-        f"[{c['source']} / {c['title']}]\n{c['content']}" for c in rag_chunks
-    )
+    # tool calling цикл
+    while True:
+        response = _chat(messages, tools=TOOLS)
+        choice = response["choices"][0]
+        message = choice["message"]
+        finish_reason = choice["finish_reason"]
 
-    system = (
-        "Ты — ассистент разработчика. Отвечай на вопросы о проекте, "
-        "опираясь на предоставленную документацию и контекст репозитория. "
-        "Если ответа в документации нет — скажи об этом явно."
-    )
+        messages.append(message)
 
-    user = (
-        f"Текущая git-ветка: {git_branch}\n\n"
-        f"Документация проекта:\n{docs_context}\n\n"
-        f"Вопрос: {question}"
-    )
+        if finish_reason == "tool_calls":
+            for tool_call in message["tool_calls"]:
+                name = tool_call["function"]["name"]
+                args = json.loads(tool_call["function"]["arguments"] or "{}")
+                tool_id = tool_call["id"]
 
-    payload = json.dumps({
-        "model": CHAT_MODEL,
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-        "temperature": 0.3,
-        "reasoning": "off",
-    }).encode()
+                print(f"  [tool] {name}({args})")
 
-    req = urllib.request.Request(
-        LM_STUDIO_CHAT_URL,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-    )
-    with urllib.request.urlopen(req) as resp:
-        data = json.loads(resp.read())
+                if name == "search_docs":
+                    results = retriever_search(args["query"], index, top_k=3)
+                    result_text = "\n\n---\n\n".join(
+                        f"[{c['source']} / {c['title']}]\n{c['content']}"
+                        for c in results
+                    )
+                elif name == "git_branch":
+                    result_text = git_client.git_branch()
+                else:
+                    result_text = f"Неизвестный инструмент: {name}"
 
-    return data["choices"][0]["message"]["content"].strip()
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_id,
+                    "content": result_text,
+                })
+
+        else:
+            # finish_reason == "stop" — финальный ответ
+            return message["content"].strip()

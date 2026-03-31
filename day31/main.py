@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from src.rag.loader import load_documents
-from src.rag.retriever import build_index, load_index, search, INDEX_FILE
+from src.rag.retriever import build_index, load_index, search
 from src.mcp.client import GitMCPClient
 from src.agent.assistant import ask
 
@@ -49,16 +49,8 @@ def main():
                     print("Использование: /help <вопрос о проекте>\n")
                     continue
 
-                # RAG: найти релевантные чанки
-                chunks = search(question, index, top_k=3)
-
-                # MCP: текущая ветка
-                branch = git_client.git_branch()
-
-                print(f"\n[Ветка: {branch}] Ищу в документации...\n")
-
-                # LLM: сгенерировать ответ
-                answer = ask(question, chunks, branch)
+                print()
+                answer = ask(question, index, git_client, search)
                 print(f"{answer}\n")
 
             else:
