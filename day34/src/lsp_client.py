@@ -28,6 +28,7 @@ class LspClient:
         self._proc = subprocess.Popen(
             ["pyright", "--lsp"],
             stdin=subprocess.PIPE,
+
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
         )
@@ -56,7 +57,7 @@ class LspClient:
         self._req_id += 1
         return self._req_id
 
-    def _request(self, method: str, params: dict, timeout: float = 15.0) -> dict:
+    def _request(self, method: str, params: dict, timeout: float = 60.0) -> dict:
         req_id = self._next_id()
         event = threading.Event()
         with self._lock:
@@ -64,6 +65,7 @@ class LspClient:
         self._send({"jsonrpc": "2.0", "id": req_id, "method": method, "params": params})
         if not event.wait(timeout):
             raise TimeoutError(f"LSP request '{method}' timed out after {timeout}s")
+
         with self._lock:
             entry = self._pending.pop(req_id)
         if entry["error"]:
@@ -81,10 +83,12 @@ class LspClient:
                     chunk = self._proc.stdout.read(1)
                     if not chunk:
                         return
+
                     header += chunk
                 length = int(
                     next(
                         p for p in header.decode().split("\r\n") if p.startswith("Content-Length:")
+
                     ).split(":")[1].strip()
                 )
                 body = self._proc.stdout.read(length)
@@ -94,16 +98,20 @@ class LspClient:
                         entry = self._pending.get(msg["id"])
                     if entry:
                         entry["result"] = msg.get("result")
+
                         entry["error"] = msg.get("error")
                         entry["event"].set()
             except Exception:
                 return
 
+
     # ------------------------------------------------------------------ #
     #  LSP lifecycle                                                       #
     # ------------------------------------------------------------------ #
 
+
     def _handshake(self):
+
         root_uri = Path(self.project_root).as_uri()
         self._request(
             "initialize",
@@ -131,9 +139,15 @@ class LspClient:
         self._send_notification("initialized", {})
         self._initialized = True
         # open all .py files so pyright indexes the full workspace
+        py_files = list(Path(self.project_root).rglob("*.py"))
+        n = len([f for f in py_files if not any(p in f.parts for p in (".venv", "venv", ".git", "__pycache__", "node_modules"))])
+        import sys as _sys
+        print(f"[LSP] indexing {n} files...", file=_sys.stderr, flush=True)
         self._open_all_python_files()
-        # give pyright time to index
-        time.sleep(2.0)
+        # give pyright time to index — larger projects need more time
+        wait = min(2.0 + n * 0.02, 10.0)
+        time.sleep(wait)
+        print(f"[LSP] ready", file=_sys.stderr, flush=True)
 
     def _open_all_python_files(self):
         root = Path(self.project_root)
@@ -161,12 +175,14 @@ class LspClient:
             },
         )
 
+
     # ------------------------------------------------------------------ #
     #  public API                                                          #
     # ------------------------------------------------------------------ #
 
     def find_references(self, symbol: str) -> list[dict]:
         """
+
         Find all usages of a symbol across the project.
         Returns list of {file, line, column, context} dicts.
         """
@@ -179,9 +195,11 @@ class LspClient:
                 continue
 
             try:
+
                 lines = py_file.read_text(encoding="utf-8").splitlines()
             except Exception:
                 continue
+
 
             for line_no, line_text in enumerate(lines):
                 col = line_text.find(symbol)
@@ -213,6 +231,7 @@ class LspClient:
                     except Exception:
                         context = ""
 
+
                     entry = {
                         "file": ref_path,
                         "line": ref_line + 1,
@@ -235,7 +254,9 @@ class LspClient:
 
         for py_file in root.rglob("*.py"):
             parts = py_file.parts
+
             if any(p in parts for p in (".venv", "venv", ".git", "__pycache__", "node_modules")):
+
                 continue
 
             try:
@@ -261,9 +282,11 @@ class LspClient:
                     defs = None
 
                 if not defs:
+
                     continue
 
                 for d in (defs if isinstance(defs, list) else [defs]):
+
                     def_path = d["uri"].replace("file://", "")
                     def_line = d["range"]["start"]["line"]
                     try:

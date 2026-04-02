@@ -16,7 +16,6 @@ from pathlib import Path
 # ------------------------------------------------------------------ #
 
 class McpClient:
-
     def __init__(self, server_script: str):
         self._proc = subprocess.Popen(
             [sys.executable, server_script],
@@ -39,6 +38,7 @@ class McpClient:
         self._proc.stdin.flush()
 
     def _next_id(self) -> int:
+
         self._req_id += 1
         return self._req_id
 
@@ -50,6 +50,7 @@ class McpClient:
         self._send({"jsonrpc": "2.0", "id": req_id, "method": method, "params": params})
         if not event.wait(timeout):
             raise TimeoutError(f"MCP request '{method}' timed out")
+
         with self._lock:
             entry = self._pending.pop(req_id)
         if entry["error"]:
@@ -70,11 +71,13 @@ class McpClient:
                         p for p in header.decode().split("\r\n") if p.startswith("Content-Length:")
                     ).split(":")[1].strip()
                 )
+
                 body = self._proc.stdout.read(length)
                 msg = json.loads(body)
                 if "id" in msg:
                     with self._lock:
                         entry = self._pending.get(msg["id"])
+
                     if entry:
                         entry["result"] = msg.get("result")
                         entry["error"] = msg.get("error")
@@ -87,6 +90,7 @@ class McpClient:
             "protocolVersion": "2024-11-05",
             "capabilities": {},
             "clientInfo": {"name": "file-agent", "version": "1.0"},
+
         })
 
     def list_tools(self) -> list[dict]:
@@ -95,6 +99,7 @@ class McpClient:
 
 
     def call_tool(self, name: str, arguments: dict) -> str:
+
         result = self._request("tools/call", {"name": name, "arguments": arguments}, timeout=120.0)
         content = result.get("content", [])
         return "\n".join(c.get("text", "") for c in content if c.get("type") == "text")
@@ -104,8 +109,10 @@ class McpClient:
 
 
 # ------------------------------------------------------------------ #
+
 #  OpenAI-compatible HTTP client (urllib only)                        #
 # ------------------------------------------------------------------ #
+
 
 def _llm_request(messages: list[dict], tools: list[dict], model: str) -> dict:
     import urllib.request
@@ -118,7 +125,7 @@ def _llm_request(messages: list[dict], tools: list[dict], model: str) -> dict:
         "messages": messages,
         "tools": tools,
         "tool_choice": "auto",
-        "max_tokens": 16000,
+        "max_completion_tokens": 16000,
     }
 
     req = urllib.request.Request(
@@ -130,19 +137,29 @@ def _llm_request(messages: list[dict], tools: list[dict], model: str) -> dict:
         },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        return json.loads(resp.read())
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            return json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")
+        try:
+            detail = json.loads(body).get("error", {}).get("message", body)
+        except Exception:
+            detail = body
+        raise RuntimeError(f"API error {e.code}: {detail}") from None
 
 
 # ------------------------------------------------------------------ #
 #  Tool output printer                                                 #
 # ------------------------------------------------------------------ #
 
+
 def _print_tool_result(tool_name: str, result: str):
     """Print tool results to stdout. For find_references print full structured output."""
     if tool_name == "find_references":
         try:
             data = json.loads(result)
+
             print(f"\n[результат] Символ: {data['symbol']}")
             defs = data.get("definitions", [])
             if defs:
@@ -161,11 +178,13 @@ def _print_tool_result(tool_name: str, result: str):
     print(f"[result] {display}\n")
 
 
+
 # ------------------------------------------------------------------ #
 #  Single agentic turn                                                 #
 # ------------------------------------------------------------------ #
 
 def _run_turn(messages: list[dict], openai_tools: list[dict], mcp: McpClient, model: str):
+
     """
     Run one user turn: call LLM in a loop until it stops using tools.
     Mutates messages in place (appends assistant + tool results).
@@ -174,7 +193,12 @@ def _run_turn(messages: list[dict], openai_tools: list[dict], mcp: McpClient, mo
     for i in range(max_iterations):
         print(f"[agent] thinking... (iteration {i + 1})")
 
-        response = _llm_request(messages, openai_tools, model)
+        try:
+            response = _llm_request(messages, openai_tools, model)
+        except RuntimeError as e:
+            print(f"[error] {e}")
+            messages.pop()  # remove the user message that failed
+            return
         msg = response["choices"][0]["message"]
         finish_reason = response["choices"][0]["finish_reason"]
 
@@ -182,13 +206,22 @@ def _run_turn(messages: list[dict], openai_tools: list[dict], mcp: McpClient, mo
 
 
         if msg.get("content"):
-            print(f"\n{msg['content']}\n")
+            from rich.console import Console
+            from rich.markdown import Markdown
+
+            Console().print(Markdown(msg["content"]))
+            print()
 
         if finish_reason == "stop" or not msg.get("tool_calls"):
+            from rich.console import Console
+            from rich.rule import Rule
+            Console().print(Rule(style="bright_black"))
+
             break
 
         for tc in msg["tool_calls"]:
             tool_name = tc["function"]["name"]
+
             tool_args = json.loads(tc["function"]["arguments"])
 
             print(f"[tool] {tool_name}({json.dumps(tool_args, ensure_ascii=False)})")
@@ -198,9 +231,9 @@ def _run_turn(messages: list[dict], openai_tools: list[dict], mcp: McpClient, mo
             messages.append({
                 "role": "tool",
                 "tool_call_id": tc["id"],
-
                 "content": result,
             })
+
 
 
 # ------------------------------------------------------------------ #
@@ -234,6 +267,7 @@ def run_chat(model: str, project_root: str):
                     "name": t["name"],
                     "description": t["description"],
                     "parameters": t["inputSchema"],
+
                 },
             }
             for t in mcp_tools
@@ -247,38 +281,46 @@ def run_chat(model: str, project_root: str):
         ]
 
         print(f"\n{'='*60}")
-        print(f"File Assistant | project: {project_root}")
+        print(f"Code Assistant | project: {project_root}")
         print(f"Model: {model}")
         print(f"Type 'exit' or Ctrl+C to quit.")
         print(f"{'='*60}\n")
 
+
         while True:
             try:
-                user_input = input("you> ").strip()
+                user_input = input("\nyou> ").strip()
             except (EOFError, KeyboardInterrupt):
                 print("\nBye.")
+
                 break
 
             if not user_input:
                 continue
             if user_input.lower() in ("exit", "quit", "q"):
                 print("Bye.")
+
                 break
+
 
             messages.append({"role": "user", "content": user_input})
             _run_turn(messages, openai_tools, mcp, model)
+
 
     finally:
         mcp.stop()
 
 
+
 # backward-compat: single-task mode
+
 def run_agent(task: str, model: str, project_root: str):
     server_script = str(Path(__file__).parent / "mcp_server.py")
     mcp = McpClient(server_script)
     try:
         mcp_tools = mcp.list_tools()
         openai_tools = [
+
             {
                 "type": "function",
                 "function": {
@@ -294,9 +336,9 @@ def run_agent(task: str, model: str, project_root: str):
                 "role": "system",
                 "content": f"{SYSTEM_PROMPT}\n\nProject root: {project_root}",
             },
+
             {"role": "user", "content": task},
         ]
-
         print(f"\n{'='*60}")
         print(f"Task: {task}")
         print(f"Project: {project_root}")

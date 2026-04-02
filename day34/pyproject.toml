@@ -3,7 +3,8 @@ name = "day34-file-assistant"
 version = "0.1.0"
 description = "AI assistant for working with project files via MCP + pyright LSP"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["rich"]
+
 
 [tool.pyright]
 pythonVersion = "3.11"
