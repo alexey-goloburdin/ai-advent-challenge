@@ -1,0 +1,80 @@
+{
+  "users": [
+    {
+      "id": "u001",
+      "name": "Дарья Ковалёва",
+      "email": "dasha@example.com",
+      "plan": "Creator",
+      "podcast": "Между строк",
+      "registered": "2024-05-12"
+    },
+    {
+      "id": "u002",
+      "name": "Игорь Малинин",
+      "email": "igor@example.com",
+      "plan": "Free",
+      "podcast": "Кофе и код",
+      "registered": "2025-01-20"
+    },
+    {
+      "id": "u003",
+      "name": "Студия «Волна»",
+      "email": "hello@volna-studio.ru",
+      "plan": "Studio",
+      "podcast": "Несколько подкастов",
+      "registered": "2023-11-03"
+    }
+  ],
+  "tickets": [
+    {
+      "id": "t001",
+      "user_id": "u001",
+      "status": "open",
+      "category": "recording",
+      "subject": "Запись зависает на 30-й минуте",
+      "description": "Пишу эпизод в браузере (Chrome). Примерно на 30-й минуте запись останавливается, файл не сохраняется. Потеряла уже два эпизода. Микрофон — Blue Yeti USB.",
+      "created": "2025-03-30",
+      "priority": "high"
+    },
+    {
+      "id": "t002",
+      "user_id": "u001",
+      "status": "resolved",
+      "category": "distribution",
+      "subject": "Новый эпизод не появился на Spotify",
+      "description": "Опубликовала эпизод 3 дня назад, на Apple Podcasts он есть, а в Spotify до сих пор нет.",
+      "created": "2025-03-01",
+      "priority": "medium"
+    },
+    {
+      "id": "t003",
+      "user_id": "u002",
+      "status": "open",
+      "category": "billing",
+      "subject": "Кнопка перехода на Creator не работает",
+      "description": "Пытаюсь нажать на кнопку «Перейти на Creator» в настройках — ничего не происходит. Пробовал в Firefox и Chrome.",
+      "created": "2025-04-01",
+      "priority": "low"
+    },
+    {
+      "id": "t004",
+      "user_id": "u003",
+      "status": "in_progress",
+      "category": "api",
+      "subject": "Webhook не приходит после публикации эпизода",
+      "description": "Настроили webhook на событие episode.published. Эпизоды публикуются, но наш сервер не получает никаких запросов. Endpoint рабочий, проверили через curl. URL: https://hooks.volna-studio.ru/flowcast",
+      "created": "2025-03-28",
+      "priority": "critical"
+    },
+    {
+      "id": "t005",
+      "user_id": "u003",
+      "status": "open",
+      "category": "transcription",
+      "subject": "Транскрипция зависла в статусе processing уже 6 часов",
+      "description": "Эпизод длиной 47 минут. Запустили транскрипцию вчера вечером, сейчас статус всё ещё processing. Episode ID: ep_8f3k2m.",
+      "created": "2025-04-01",
+      "priority": "high"
+    }
+  ]
+}
